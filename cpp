@@ -1,37 +1,44 @@
-#include <opencv2/opencv.hpp>
 #include <iostream>
+#include <vector>
+
+// Function to calculate mean
+double mean(const std::vector<double>& v) {
+    double sum = 0;
+    for (auto& i : v) sum += i;
+    return sum / v.size();
+}
+
+// Function to calculate covariance
+double covariance(const std::vector<double>& x, const std::vector<double>& y, double meanX, double meanY) {
+    double sum = 0;
+    for (size_t i = 0; i < x.size(); i++)
+        sum += (x[i] - meanX) * (y[i] - meanY);
+    return sum / (x.size() - 1);
+}
+
+// Function to calculate variance
+double variance(const std::vector<double>& v, double meanV) {
+    double sum = 0;
+    for (auto& i : v) sum += (i - meanV) * (i - meanV);
+    return sum / (v.size() - 1);
+}
+
+// Main function to perform linear regression
+void linearRegression(const std::vector<double>& x, const std::vector<double>& y) {
+    double meanX = mean(x);
+    double meanY = mean(y);
+    double a = covariance(x, y, meanX, meanY) / variance(x, meanX);
+    double b = meanY - a * meanX;
+
+    std::cout << "Linear Regression Equation: y = " << a << " * x + " << b << std::endl;
+}
 
 int main() {
-    // Load the cascade
-    cv::CascadeClassifier face_cascade;
-    if (!face_cascade.load("haarcascade_frontalface_default.xml")) {
-        std::cout << "Error loading face cascade file." << std::endl;
-        return -1;
-    }
+    // Example usage
+    std::vector<double> x = {1, 2, 3, 4, 5};
+    std::vector<double> y = {2, 4, 6, 8, 10};
 
-    // Read the image file
-    cv::Mat image = cv::imread("test_image.jpg");
-    if (image.empty()) {
-        std::cout << "Could not read the image." << std::endl;
-        return -1;
-    }
-
-    // Convert to grayscale
-    cv::Mat gray;
-    cvtColor(image, gray, cv::COLOR_BGR2GRAY);
-
-    // Detect faces
-    std::vector<cv::Rect> faces;
-    face_cascade.detectMultiScale(gray, faces);
-
-    // Draw rectangles around the faces
-    for (size_t i = 0; i < faces.size(); i++) {
-        cv::rectangle(image, faces[i], cv::Scalar(255, 0, 0), 2);
-    }
-
-    // Show the output
-    cv::imshow("Face Detection", image);
-    cv::waitKey(0);
+    linearRegression(x, y);
 
     return 0;
 }
